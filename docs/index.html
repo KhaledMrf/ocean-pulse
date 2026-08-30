@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ocean Pulse — How busy is Ocean Fitness right now?</title>
+  <meta name="description" content="Live busyness and popular times at Ocean Fitness, Lebanon.">
+  <meta name="theme-color" content="#EFF6F9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#071C29" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Ocean Pulse">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <svg class="logo" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+      <rect x="1" y="1" width="46" height="46" rx="12" fill="var(--brand-fill)"/>
+      <path d="M8 27 q4-5 8 0 q4 5 8 0 l2 0 l2.5-9 l3 13 l2-4 l2.5 0 q3-4 6 0"
+            fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="wordmark">
+      <h1>Ocean Pulse</h1>
+      <p class="tagline">How busy is the gym right now?</p>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Owner-facing setup notice (shown only when OCEAN_API_URL is empty) -->
+    <section class="card setup" id="setup" hidden>
+      <h2>API not connected yet</h2>
+      <p>Ocean Pulse is deployed, but it doesn't know where your gym's data lives.</p>
+      <p>Open <code>docs/config.js</code> and paste your Apps Script <code>/exec</code> URL
+         into <code>OCEAN_API_URL</code> — see <strong>README, step&nbsp;4</strong>.</p>
+    </section>
+
+    <!-- Live busyness -->
+    <section class="card live" id="live" hidden aria-live="polite">
+      <div class="card-head">
+        <span class="eyebrow">Right now</span>
+        <span class="badge badge-cached" id="cachedBadge" hidden>cached</span>
+        <span class="badge badge-stale" id="staleBadge" hidden>live paused</span>
+      </div>
+
+      <div class="gauge-wrap">
+        <svg class="gauge" viewBox="0 0 200 112" role="img" aria-labelledby="gaugeTitle">
+          <title id="gaugeTitle">Busyness gauge</title>
+          <path class="gauge-track" d="M16 104 A 88 88 0 0 1 184 104"
+                fill="none" stroke-width="14" stroke-linecap="round"/>
+          <path class="gauge-fill" id="gaugeFill" d="M16 104 A 88 88 0 0 1 184 104"
+                fill="none" stroke-width="14" stroke-linecap="round"
+                pathLength="100" stroke-dasharray="0 100"/>
+          <text class="gauge-pct" id="gaugePct" x="100" y="86" text-anchor="middle">–</text>
+          <text class="gauge-pct-cap" x="100" y="103" text-anchor="middle">of a busy hour</text>
+        </svg>
+      </div>
+
+      <div class="live-label">
+        <p class="busy-label" id="busyLabel">—</p>
+        <p class="busy-label-ar" id="busyLabelAr" lang="ar" dir="rtl"></p>
+      </div>
+
+      <p class="asof" id="asOf"></p>
+      <p class="live-note" id="liveNote" hidden></p>
+    </section>
+
+    <!-- Live error / offline with no cache -->
+    <section class="card live-error" id="liveError" hidden>
+      <h2>Can't reach the gym right now</h2>
+      <p>Check your connection, then pull down or tap refresh below.</p>
+    </section>
+
+    <!-- Popular times -->
+    <section class="card popular" id="popular" hidden>
+      <div class="card-head">
+        <div>
+          <h2 class="chart-title">Popular times <span class="hours-note">6:00–22:00</span></h2>
+          <p class="chart-title-ar" lang="ar" dir="rtl">أوقات الذروة</p>
+        </div>
+      </div>
+
+      <div class="tabs" id="dayTabs" role="tablist" aria-label="Day of week"></div>
+
+      <div class="chart" id="chart" role="img" aria-label="Typical busyness by hour"></div>
+      <div class="axis" id="axis" aria-hidden="true"></div>
+      <p class="chart-note" id="chartNote">Typical busyness — taller means busier.</p>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>Ocean Fitness · Lebanon</span>
+    <button class="refresh" id="refreshBtn" type="button" aria-label="Refresh data" title="Refresh">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+        <path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

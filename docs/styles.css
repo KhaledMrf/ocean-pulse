@@ -1,0 +1,365 @@
+/* Ocean Pulse — styles. Zero frameworks, system fonts, mobile-first. */
+
+:root {
+  --surface: #EFF6F9;
+  --card: #FFFFFF;
+  --ink: #0A2C3D;
+  --ink-2: #49687A;
+  --ink-3: #7C97A6;
+  --border: #DBE8EE;
+  --bar: #3E96BD;          /* sequential base (≥3:1 on card) */
+  --bar-now: #085B7E;      /* emphasis: current hour */
+  --accent: #0B7CA8;       /* interactive + gauge fill */
+  --track: #D9E9F0;
+  --brand-fill: #0B7CA8;
+  --stale-bar: #A9BFCB;
+  --badge-cached-bg: #FBEED3;
+  --badge-cached-ink: #7A5410;
+  --badge-stale-bg: #E4EBEF;
+  --badge-stale-ink: #49687A;
+  --focus: #085B7E;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #071C29;
+    --card: #0C2A3A;
+    --ink: #E9F4F9;
+    --ink-2: #92B2C1;
+    --ink-3: #678797;
+    --border: #17394D;
+    --bar: #3D93B8;
+    --bar-now: #55CDEF;
+    --accent: #55CDEF;
+    --track: #123A4E;
+    --brand-fill: #0B7CA8;
+    --stale-bar: #33505F;
+    --badge-cached-bg: #3D3110;
+    --badge-cached-ink: #EACB7B;
+    --badge-stale-bg: #14334455;
+    --badge-stale-ink: #92B2C1;
+    --focus: #55CDEF;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: max(12px, env(safe-area-inset-top)) 16px max(12px, env(safe-area-inset-bottom));
+}
+
+main {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+  width: 100%;
+  max-width: 430px;
+  margin: 4px auto 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo { width: 44px; height: 44px; flex: none; }
+
+.wordmark h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.tagline {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+/* ---------- Cards ---------- */
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 18px 18px 16px;
+}
+
+.card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+h2 { margin: 0; font-size: 17px; font-weight: 700; }
+
+.badge {
+  margin-inline-start: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge + .badge { margin-inline-start: 6px; }
+.badge-cached { background: var(--badge-cached-bg); color: var(--badge-cached-ink); }
+.badge-stale  { background: var(--badge-stale-bg);  color: var(--badge-stale-ink); }
+
+/* ---------- Setup notice ---------- */
+
+.setup p { margin: 8px 0 0; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.setup code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1px 5px;
+  color: var(--ink);
+}
+
+/* ---------- Live gauge ---------- */
+
+.gauge-wrap { display: flex; justify-content: center; margin: 6px 0 2px; }
+.gauge { width: 200px; height: 112px; }
+
+.gauge-track { stroke: var(--track); }
+.gauge-fill  { stroke: var(--accent); transition: stroke-dasharray 700ms cubic-bezier(.22,1,.36,1); }
+
+.gauge-pct {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  fill: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.gauge-pct-cap { font-size: 10px; fill: var(--ink-3); letter-spacing: 0.04em; }
+
+.live-label { text-align: center; margin-top: 8px; }
+
+.busy-label {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.busy-label-ar {
+  margin: 3px 0 0;
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+.asof {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.live-note {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+/* Stale live data → grey to typical-only */
+.live.is-stale .gauge-fill { stroke: var(--stale-bar); }
+.live.is-stale .gauge-pct,
+.live.is-stale .busy-label { fill: var(--ink-3); color: var(--ink-3); }
+.live.is-stale .busy-label-ar { color: var(--ink-3); }
+
+.live-error p { margin: 8px 0 0; font-size: 14px; color: var(--ink-2); }
+
+/* ---------- Popular times ---------- */
+
+.chart-title { display: flex; align-items: baseline; gap: 8px; }
+.hours-note { font-size: 12px; font-weight: 500; color: var(--ink-3); }
+.chart-title-ar { margin: 2px 0 0; font-size: 13px; color: var(--ink-2); }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 12px 0 14px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex: 1 0 auto;
+  min-width: 38px;
+  min-height: 40px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.tab[aria-selected="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--card);
+}
+
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;                    /* ≥2px spacer between adjacent bars */
+  height: 148px;
+  padding-top: 18px;           /* room for the "now" pill */
+}
+
+.bar {
+  flex: 1 1 0;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: var(--bar);
+  border-radius: 4px 4px 0 0;  /* rounded data-end, flat baseline */
+  min-height: 2px;
+  position: relative;
+  cursor: default;
+}
+.bar.is-now { background: var(--bar-now); }
+
+.bar.is-now::before {
+  content: "now";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -3px);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--bar-now);
+  white-space: nowrap;
+}
+
+/* Tap/hover/focus value tooltip */
+.bar:hover::after,
+.bar:focus-visible::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -3px);
+  background: var(--ink);
+  color: var(--card);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
+  font-variant-numeric: tabular-nums;
+}
+.bar.is-now:hover::before,
+.bar.is-now:focus-visible::before { content: none; }
+
+.axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-note {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.chart-empty {
+  align-self: center;
+  width: 100%;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  width: 100%;
+  max-width: 430px;
+  margin: 22px auto 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+
+.refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+.refresh:active svg { transform: rotate(180deg); }
+.refresh svg { transition: transform 300ms ease; }
+.refresh.is-loading svg { animation: spin 900ms linear infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- A11y & motion ---------- */
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gauge-fill { transition: none; }
+  .refresh svg, .refresh.is-loading svg { transition: none; animation: none; }
+}

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0E85B4"/>
+      <stop offset="1" stop-color="#083A55"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#sea)"/>
+  <!-- pulse riding a wave -->
+  <path d="M78 300 Q112 262 146 300 Q180 338 214 300 L236 300 L260 208 L284 362 L302 300 L322 300 Q356 262 390 300 Q414 327 434 310"
+        fill="none" stroke="#FFFFFF" stroke-width="26"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- quiet swell beneath -->
+  <path d="M118 384 Q148 358 178 384 Q208 410 238 384 Q268 358 298 384 Q328 410 358 384 Q380 366 394 376"
+        fill="none" stroke="#FFFFFF" stroke-width="16" opacity="0.35"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
