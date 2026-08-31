@@ -5,27 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Ocean Pulse — How busy is Ocean Fitness right now?</title>
   <meta name="description" content="Live busyness and popular times at Ocean Fitness, Lebanon.">
-  <meta name="theme-color" content="#EFF6F9" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#071C29" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#060D15">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon-180.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ocean Pulse">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800;1,900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <header class="site-header">
-    <svg class="logo" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-      <rect x="1" y="1" width="46" height="46" rx="12" fill="var(--brand-fill)"/>
-      <path d="M8 27 q4-5 8 0 q4 5 8 0 l2 0 l2.5-9 l3 13 l2-4 l2.5 0 q3-4 6 0"
-            fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <svg class="logo" viewBox="0 0 42 42" aria-hidden="true" focusable="false">
+      <rect x="1" y="1" width="40" height="40" rx="12" fill="#04121D" stroke="#1B4560" stroke-width="1.5"/>
+      <path d="M8 26 Q 12 18 17 22 Q 21 25 24 20 L 26 15 L 29 27 L 31 22 Q 33 19 36 22"
+            fill="none" stroke="#35B6F2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
     <div class="wordmark">
-      <h1>Ocean Pulse</h1>
-      <p class="tagline">How busy is the gym right now?</p>
+      <h1>Ocean <span class="brand-accent">Pulse</span></h1>
+      <p class="tagline">Dive in · Belong here</p>
     </div>
   </header>
 
@@ -55,15 +57,21 @@
       </div>
 
       <div class="gauge-wrap">
-        <svg class="gauge" viewBox="0 0 200 112" role="img" aria-labelledby="gaugeTitle">
+        <svg class="gauge" viewBox="0 0 230 132" role="img" aria-labelledby="gaugeTitle">
           <title id="gaugeTitle">Busyness gauge</title>
-          <path class="gauge-track" d="M16 104 A 88 88 0 0 1 184 104"
-                fill="none" stroke-width="14" stroke-linecap="round"/>
-          <path class="gauge-fill" id="gaugeFill" d="M16 104 A 88 88 0 0 1 184 104"
-                fill="none" stroke-width="14" stroke-linecap="round"
+          <defs>
+            <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#1273A6"/>
+              <stop offset="1" stop-color="#3FC0F5"/>
+            </linearGradient>
+          </defs>
+          <path class="gauge-track" d="M20 122 A 95 95 0 0 1 210 122"
+                fill="none" stroke-width="15" stroke-linecap="round"/>
+          <path class="gauge-fill" id="gaugeFill" d="M20 122 A 95 95 0 0 1 210 122"
+                fill="none" stroke-width="15" stroke-linecap="round"
                 pathLength="100" stroke-dasharray="0 100"/>
-          <text class="gauge-pct" id="gaugePct" x="100" y="86" text-anchor="middle">–</text>
-          <text class="gauge-pct-cap" x="100" y="103" text-anchor="middle">of a busy hour</text>
+          <text class="gauge-pct" id="gaugePct" x="115" y="94" text-anchor="middle">–</text>
+          <text class="gauge-pct-cap" x="115" y="116" text-anchor="middle">OF PEAK HOURS</text>
         </svg>
       </div>
 
@@ -126,7 +134,7 @@
         <label for="loginPw">Password</label>
         <input id="loginPw" type="password" autocomplete="current-password" required>
         <p class="form-error" id="loginError" role="alert" hidden></p>
-        <button type="submit" class="btn-primary" id="loginBtn">Sign in</button>
+        <button type="submit" class="btn-primary" id="loginBtn">Dive in</button>
       </form>
       <p class="form-note">First time here? Ask the front desk to send your personal
          <strong>activation link</strong> on WhatsApp — then you set your own password.</p>

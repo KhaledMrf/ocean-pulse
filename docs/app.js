@@ -13,7 +13,8 @@
   var POLL_MS = 3 * 60 * 1000;
 
   var DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
-  var DAY_LABELS = { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" };
+  var DAY_LABELS = { mon: "M", tue: "T", wed: "W", thu: "T", fri: "F", sat: "S", sun: "S" };
+  var DAY_NAMES = { mon: "Monday", tue: "Tuesday", wed: "Wednesday", thu: "Thursday", fri: "Friday", sat: "Saturday", sun: "Sunday (closed)" };
 
   var AR_LABELS = {
     "Quiet": "هادئ",
@@ -190,10 +191,11 @@
     DAY_KEYS.forEach(function (key) {
       var b = document.createElement("button");
       b.type = "button";
-      b.className = "tab";
+      b.className = "tab" + (key === "sun" ? " is-closed" : "");
       b.id = "tab-" + key;
       b.setAttribute("role", "tab");
       b.setAttribute("aria-selected", String(key === state.selectedDay));
+      b.setAttribute("aria-label", DAY_NAMES[key]);
       b.textContent = DAY_LABELS[key];
       b.addEventListener("click", function () { state.userPicked = true; selectDay(key); });
       els.dayTabs.appendChild(b);
@@ -239,9 +241,10 @@
     hours.forEach(function (h, i) {
       var v = Math.max(0, Number(values[i]) || 0);
       var share = Math.round((v / globalMax) * 100);
+      var tier = share >= 78 ? " bar-hi" : (share <= 24 ? " bar-lo" : "");
       var bar = document.createElement("button");
       bar.type = "button";
-      bar.className = "bar" + (isToday && h === nowHour ? " is-now" : "");
+      bar.className = "bar" + tier + (isToday && h === nowHour ? " is-now" : "");
       bar.style.height = Math.max(2, share) + "%";
       bar.dataset.tip = hourLabel(h) + " · " + share + "%";
       bar.setAttribute("aria-label", hourLabel(h) + ", " + share + "% of the busiest hour" +
@@ -424,15 +427,22 @@
   function renderProfile(m, meta) {
     var h = "";
 
-    h += '<div class="hello"><h2>Hi ' + esc(m.firstName || "there") + " 👋</h2>" +
+    h += '<div class="hello"><h2>Hi ' + esc(m.firstName || "there") + "</h2>" +
          '<button type="button" class="signout" id="signoutBtn">sign out</button></div>';
 
     if (m.status === "active" && m.plan) {
       var d = Number(m.plan.daysRemaining);
-      var daysText = d === 0 ? "Expires today" : d === 1 ? "1 day left" : d + " days left";
-      h += '<section class="card">' +
-        '<p class="plan-name">' + esc(m.plan.name) + "</p>" +
-        '<p class="days-left' + (d <= 3 ? " is-low" : "") + '">' + daysText + "</p>" +
+      var daysNum = d === 0 ? "Today" : String(d);
+      var daysCap = d === 0 ? "last day — expires tonight" : (d === 1 ? "day left" : "days left");
+      h += '<section class="plan-hero">' +
+        '<div class="plan-head">' +
+          '<p class="plan-name">' + esc(m.plan.name) + "</p>" +
+          '<span class="plan-chip">Active</span>' +
+        "</div>" +
+        '<div class="days-left-row">' +
+          '<p class="days-left' + (d <= 3 ? " is-low" : "") + '">' + daysNum + "</p>" +
+          '<span class="days-left-cap">' + daysCap + "</span>" +
+        "</div>" +
         '<p class="plan-dates">Until <strong>' + esc(fmtDate(m.plan.endDate)) + "</strong>" +
         (m.memberSince ? " · member since " + esc(fmtDate(m.memberSince)) : "") + "</p>" +
         (m.plan.progressPct != null
@@ -440,20 +450,20 @@
           : "") +
         "</section>";
     } else if (m.status === "expired") {
-      h += '<div class="status-banner expired">Your membership ended' +
-        (m.plan && m.plan.endDate ? " on <strong>" + esc(fmtDate(m.plan.endDate)) + "</strong>" : "") +
-        ". We'd love to see you back! 🌊</div>";
+      h += '<div class="status-banner expired"><span class="banner-title">Membership expired</span>' +
+        "It ended" + (m.plan && m.plan.endDate ? " on <strong>" + esc(fmtDate(m.plan.endDate)) + "</strong>" : "") +
+        " — we'd love to see you back in the water.</div>";
       h += waButton(m, "I'd like to renew my membership");
     } else {
-      h += '<div class="status-banner none">No active membership — you\'re welcome anytime! ' +
-        "Day passes are available at the front desk, or start a plan below.</div>";
+      h += '<div class="status-banner none"><span class="banner-title">No active membership</span>' +
+        "You're welcome anytime — day passes at the front desk, or start a plan and make it official.</div>";
       h += waButton(m, "I'd like to subscribe");
     }
 
     h += '<div class="stat-row">' +
-      stat(m.lifetimeVisits, "total visits") +
-      stat(m.visits30d, "last 30 days") +
-      stat(m.lastVisit ? fmtDate(m.lastVisit) : "—", "last visit") +
+      stat(m.lifetimeVisits, "total visits", false) +
+      stat(m.visits30d, "last 30 days", true) +
+      stat(m.lastVisit ? fmtDate(m.lastVisit) : "—", "last visit", false) +
       "</div>";
 
     if (m.timeline && m.timeline.length) {
@@ -476,8 +486,8 @@
     });
   }
 
-  function stat(value, label) {
-    return '<div class="stat"><b>' + esc(value == null ? "—" : value) + "</b><span>" + esc(label) + "</span></div>";
+  function stat(value, label, accent) {
+    return '<div class="stat' + (accent ? " stat-accent" : "") + '"><b>' + esc(value == null ? "—" : value) + "</b><span>" + esc(label) + "</span></div>";
   }
 
   function waButton(m, text) {

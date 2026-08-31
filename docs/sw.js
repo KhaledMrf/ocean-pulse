@@ -3,7 +3,7 @@
    (cross-origin requests pass straight through — localStorage in app.js
    handles data persistence). Bump CACHE_VERSION on every deploy. */
 
-var CACHE_VERSION = "ocean-pulse-v3"; /* v3: M3 member area */
+var CACHE_VERSION = "ocean-pulse-v4"; /* v4: Deep Water brand theme */
 
 var SHELL = [
   "./",
