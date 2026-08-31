@@ -8,6 +8,8 @@
 
   var LS_BUSY = "op:busy:v1";
   var LS_TYPICAL = "op:typical:v1";
+  var LS_AUTH = "op:auth:v1";
+  var LS_ME = "op:me:v1";
   var POLL_MS = 3 * 60 * 1000;
 
   var DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
@@ -37,7 +39,26 @@
     dayTabs: $("dayTabs"),
     chart: $("chart"),
     axis: $("axis"),
-    refreshBtn: $("refreshBtn")
+    refreshBtn: $("refreshBtn"),
+    viewNav: $("viewNav"),
+    navPulse: $("navPulse"),
+    navMember: $("navMember"),
+    viewPulse: $("view-pulse"),
+    viewMember: $("view-member"),
+    memberActivate: $("memberActivate"),
+    activateIntro: $("activateIntro"),
+    activateForm: $("activateForm"),
+    activateError: $("activateError"),
+    activateBtn: $("activateBtn"),
+    actPw: $("actPw"),
+    actPw2: $("actPw2"),
+    memberLogin: $("memberLogin"),
+    loginForm: $("loginForm"),
+    loginError: $("loginError"),
+    loginBtn: $("loginBtn"),
+    loginPhone: $("loginPhone"),
+    loginPw: $("loginPw"),
+    memberProfile: $("memberProfile")
   };
 
   var state = {
@@ -313,12 +334,233 @@
     }
   });
 
+  /* ---------- member area (M3) ---------- */
+
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  var member = {
+    view: "pulse",          // 'pulse' | 'member'
+    pendingActivation: null // {cid, code} parsed from the WhatsApp link
+  };
+
+  function authGet() { var a = lsGet(LS_AUTH); return a && a.data && a.data.cid && a.data.token ? a.data : null; }
+  function authSet(data) { lsSet(LS_AUTH, data); }
+  function authClear() {
+    try { localStorage.removeItem(LS_AUTH); localStorage.removeItem(LS_ME); } catch (e) { /* ok */ }
+  }
+
+  /* POST as text/plain => CORS simple request (Apps Script can't answer
+     preflights). The response, after the googleusercontent redirect, is JSON. */
+  function apiPost(body) {
+    return fetch(API, { method: "POST", redirect: "follow", body: JSON.stringify(body) })
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      });
+  }
+
+  function fmtDate(ymd) { // '2026-09-25' -> '25 Sep 2026'
+    if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return ymd || "";
+    var p = ymd.split("-");
+    return Number(p[2]) + " " + MONTHS[Number(p[1]) - 1] + " " + p[0];
+  }
+
+  function showView(name) {
+    member.view = name;
+    els.viewPulse.hidden = name !== "pulse";
+    els.viewMember.hidden = name !== "member";
+    els.navPulse.setAttribute("aria-selected", String(name === "pulse"));
+    els.navMember.setAttribute("aria-selected", String(name === "member"));
+    if (name === "member") renderMemberArea();
+  }
+
+  /* Decide which member sub-screen to show. */
+  function renderMemberArea() {
+    var auth = authGet();
+    els.memberActivate.hidden = true;
+    els.memberLogin.hidden = true;
+    els.memberProfile.hidden = true;
+
+    if (member.pendingActivation) {
+      els.memberActivate.hidden = false;
+      return;
+    }
+    if (!auth) {
+      els.memberLogin.hidden = false;
+      return;
+    }
+    els.memberProfile.hidden = false;
+    var cachedMe = lsGet(LS_ME);
+    if (cachedMe && cachedMe.data) renderProfile(cachedMe.data, { cached: true, cachedAt: cachedMe.t });
+    loadMe();
+  }
+
+  function loadMe() {
+    var auth = authGet();
+    if (!auth) return Promise.resolve();
+    return apiPost({ action: "me", cid: auth.cid, token: auth.token })
+      .then(function (json) {
+        if (json && json.ok === true && json.member) {
+          lsSet(LS_ME, json.member);
+          renderProfile(json.member, { cached: false });
+        } else if (json && json.error === "auth") {
+          // Password changed elsewhere / secret rotated: sign out gracefully.
+          authClear();
+          els.memberProfile.hidden = true;
+          els.memberLogin.hidden = false;
+          showFormError(els.loginError, "Please sign in again.");
+        }
+        // other errors: keep whatever is on screen (cached copy)
+      })
+      .catch(function () { /* offline: cached copy already rendered */ });
+  }
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function renderProfile(m, meta) {
+    var h = "";
+
+    h += '<div class="hello"><h2>Hi ' + esc(m.firstName || "there") + " 👋</h2>" +
+         '<button type="button" class="signout" id="signoutBtn">sign out</button></div>';
+
+    if (m.status === "active" && m.plan) {
+      var d = Number(m.plan.daysRemaining);
+      var daysText = d === 0 ? "Expires today" : d === 1 ? "1 day left" : d + " days left";
+      h += '<section class="card">' +
+        '<p class="plan-name">' + esc(m.plan.name) + "</p>" +
+        '<p class="days-left' + (d <= 3 ? " is-low" : "") + '">' + daysText + "</p>" +
+        '<p class="plan-dates">Until <strong>' + esc(fmtDate(m.plan.endDate)) + "</strong>" +
+        (m.memberSince ? " · member since " + esc(fmtDate(m.memberSince)) : "") + "</p>" +
+        (m.plan.progressPct != null
+          ? '<div class="plan-progress" role="img" aria-label="' + m.plan.progressPct + '% of this membership period used"><span style="width:' + m.plan.progressPct + '%"></span></div>'
+          : "") +
+        "</section>";
+    } else if (m.status === "expired") {
+      h += '<div class="status-banner expired">Your membership ended' +
+        (m.plan && m.plan.endDate ? " on <strong>" + esc(fmtDate(m.plan.endDate)) + "</strong>" : "") +
+        ". We'd love to see you back! 🌊</div>";
+      h += waButton(m, "I'd like to renew my membership");
+    } else {
+      h += '<div class="status-banner none">No active membership — you\'re welcome anytime! ' +
+        "Day passes are available at the front desk, or start a plan below.</div>";
+      h += waButton(m, "I'd like to subscribe");
+    }
+
+    h += '<div class="stat-row">' +
+      stat(m.lifetimeVisits, "total visits") +
+      stat(m.visits30d, "last 30 days") +
+      stat(m.lastVisit ? fmtDate(m.lastVisit) : "—", "last visit") +
+      "</div>";
+
+    if (m.timeline && m.timeline.length) {
+      h += '<section class="card"><h2>Your journey</h2><ul class="timeline">' +
+        m.timeline.map(function (t) {
+          return "<li><span>" + esc(t.plan) + '</span><span class="tl-date">' + esc(fmtDate(t.date)) + "</span></li>";
+        }).join("") + "</ul></section>";
+    }
+
+    if (meta && meta.cached) {
+      h += '<p class="member-cached">Showing saved data' +
+        (meta.cachedAt ? " from " + fmtClock(new Date(meta.cachedAt)) : "") + " — updating…</p>";
+    }
+
+    els.memberProfile.innerHTML = h;
+    var so = $("signoutBtn");
+    if (so) so.addEventListener("click", function () {
+      authClear();
+      renderMemberArea();
+    });
+  }
+
+  function stat(value, label) {
+    return '<div class="stat"><b>' + esc(value == null ? "—" : value) + "</b><span>" + esc(label) + "</span></div>";
+  }
+
+  function waButton(m, text) {
+    if (!m.whatsapp) return "";
+    var url = "https://wa.me/" + String(m.whatsapp).replace(/\D/g, "") +
+      "?text=" + encodeURIComponent("Hi Ocean Fitness! " + text + " 💪");
+    return '<a class="btn-wa" href="' + esc(url) + '" target="_blank" rel="noopener">Message us on WhatsApp</a>';
+  }
+
+  /* ---------- member forms ---------- */
+
+  function showFormError(el, msg) { el.textContent = msg; el.hidden = false; }
+  function clearFormError(el) { el.textContent = ""; el.hidden = true; }
+
+  var AUTH_ERRORS = {
+    rate: "Too many tries — wait a few minutes and try again.",
+    busy: "The service is a bit crowded right now — try again in a minute.",
+    weak_password: "Password needs at least 6 characters.",
+    expired_link: "This link has expired — ask the front desk to send you a fresh one.",
+    not_activated: "This phone isn't set up yet — ask the front desk for your activation link.",
+    auth: "That didn't match. Check the number and password and try again."
+  };
+
+  els.activateForm.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    clearFormError(els.activateError);
+    var pw = els.actPw.value, pw2 = els.actPw2.value;
+    if (pw.length < 6) return showFormError(els.activateError, AUTH_ERRORS.weak_password);
+    if (pw !== pw2) return showFormError(els.activateError, "The two passwords don't match.");
+    var pa = member.pendingActivation;
+    if (!pa) return;
+    els.activateBtn.disabled = true;
+    apiPost({ action: "activate", cid: pa.cid, code: pa.code, newPassword: pw })
+      .then(function (json) {
+        if (json && json.ok === true) {
+          authSet({ cid: json.cid, token: json.token, firstName: json.firstName });
+          member.pendingActivation = null;
+          if (history.replaceState) history.replaceState(null, "", location.pathname + location.search);
+          renderMemberArea();
+        } else {
+          var code = (json && json.error === "auth") ? "expired_link" : (json && json.error);
+          showFormError(els.activateError, AUTH_ERRORS[code] || AUTH_ERRORS.auth);
+        }
+      })
+      .catch(function () { showFormError(els.activateError, "Can't reach the gym right now — check your connection."); })
+      .then(function () { els.activateBtn.disabled = false; });
+  });
+
+  els.loginForm.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    clearFormError(els.loginError);
+    var phone = els.loginPhone.value.trim(), pw = els.loginPw.value;
+    if (!phone || !pw) return showFormError(els.loginError, "Enter your phone number and password.");
+    els.loginBtn.disabled = true;
+    apiPost({ action: "login", phone: phone, password: pw })
+      .then(function (json) {
+        if (json && json.ok === true) {
+          authSet({ cid: json.cid, token: json.token, firstName: json.firstName });
+          els.loginPw.value = "";
+          renderMemberArea();
+        } else {
+          showFormError(els.loginError, AUTH_ERRORS[json && json.error] || AUTH_ERRORS.auth);
+        }
+      })
+      .catch(function () { showFormError(els.loginError, "Can't reach the gym right now — check your connection."); })
+      .then(function () { els.loginBtn.disabled = false; });
+  });
+
+  /* Activation links look like  <app>/#activate=1042.WXYZ2345  */
+  function parseActivationHash() {
+    var m = /^#activate=([^.\s]+)\.([A-Za-z0-9]+)$/.exec(location.hash || "");
+    if (m) member.pendingActivation = { cid: m[1], code: m[2].toUpperCase() };
+    return !!m;
+  }
+
   /* ---------- refresh ---------- */
 
   els.refreshBtn.addEventListener("click", function () {
     if (!API) return;
     els.refreshBtn.classList.add("is-loading");
-    Promise.all([loadBusy(), loadTypical(true)]).then(function () {
+    var jobs = [loadBusy(), loadTypical(true)];
+    if (member.view === "member" && authGet()) jobs.push(loadMe());
+    Promise.all(jobs).then(function () {
       els.refreshBtn.classList.remove("is-loading");
     });
   });
@@ -331,12 +573,27 @@
       els.live.hidden = true;
       els.liveError.hidden = true;
       els.popular.hidden = true;
+      els.viewNav.hidden = true;
+      els.viewMember.hidden = true;
       return;
     }
     els.setup.hidden = true;
+    els.viewNav.hidden = false;
+
+    els.navPulse.addEventListener("click", function () { showView("pulse"); });
+    els.navMember.addEventListener("click", function () { showView("member"); });
+    window.addEventListener("hashchange", function () {
+      if (parseActivationHash()) showView("member");
+    });
+
     loadBusy();
     loadTypical(false);
     startPolling();
+
+    // A WhatsApp activation link lands on the member view; everyone else
+    // (signed-in or not) starts on busyness — the daily-use screen.
+    if (parseActivationHash()) showView("member");
+    else showView("pulse");
   }
 
   boot();

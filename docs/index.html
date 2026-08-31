@@ -29,6 +29,11 @@
     </div>
   </header>
 
+  <nav class="view-nav" id="viewNav" hidden aria-label="Sections">
+    <button type="button" class="view-tab" id="navPulse" data-view="pulse" aria-selected="true">Busyness</button>
+    <button type="button" class="view-tab" id="navMember" data-view="member" aria-selected="false">My Membership</button>
+  </nav>
+
   <main>
 
     <!-- Owner-facing setup notice (shown only when OCEAN_API_URL is empty) -->
@@ -38,6 +43,8 @@
       <p>Open <code>docs/config.js</code> and paste your Apps Script <code>/exec</code> URL
          into <code>OCEAN_API_URL</code> — see <strong>README, step&nbsp;4</strong>.</p>
     </section>
+
+    <div class="view" id="view-pulse">
 
     <!-- Live busyness -->
     <section class="card live" id="live" hidden aria-live="polite">
@@ -90,6 +97,45 @@
       <div class="axis" id="axis" aria-hidden="true"></div>
       <p class="chart-note" id="chartNote">Typical busyness — taller means busier.</p>
     </section>
+
+    </div><!-- /view-pulse -->
+
+    <div class="view" id="view-member" hidden>
+
+    <!-- First-time setup (arrived via a personal activation link) -->
+    <section class="card member-form" id="memberActivate" hidden>
+      <h2>Welcome to Ocean Pulse 🌊</h2>
+      <p class="form-intro" id="activateIntro">Choose a password to finish setting up your account.</p>
+      <form id="activateForm" novalidate>
+        <label for="actPw">New password <span class="label-hint">(6+ characters)</span></label>
+        <input id="actPw" type="password" autocomplete="new-password" minlength="6" required>
+        <label for="actPw2">Repeat password</label>
+        <input id="actPw2" type="password" autocomplete="new-password" minlength="6" required>
+        <p class="form-error" id="activateError" role="alert" hidden></p>
+        <button type="submit" class="btn-primary" id="activateBtn">Set password &amp; sign in</button>
+      </form>
+    </section>
+
+    <!-- Returning member sign-in -->
+    <section class="card member-form" id="memberLogin" hidden>
+      <h2>My membership</h2>
+      <p class="form-intro">Sign in to see your plan, expiry date and visits.</p>
+      <form id="loginForm" novalidate>
+        <label for="loginPhone">Phone number</label>
+        <input id="loginPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="76 123 456" required>
+        <label for="loginPw">Password</label>
+        <input id="loginPw" type="password" autocomplete="current-password" required>
+        <p class="form-error" id="loginError" role="alert" hidden></p>
+        <button type="submit" class="btn-primary" id="loginBtn">Sign in</button>
+      </form>
+      <p class="form-note">First time here? Ask the front desk to send your personal
+         <strong>activation link</strong> on WhatsApp — then you set your own password.</p>
+    </section>
+
+    <!-- Profile (rendered by app.js) -->
+    <section id="memberProfile" hidden></section>
+
+    </div><!-- /view-member -->
 
   </main>
 

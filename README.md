@@ -18,9 +18,9 @@ No frameworks, no build step, no member data, no secrets.
 
 ## Roadmap
 
-- **M1 — live busyness + popular times** (public, no login) ← current
-- **M2** — smarter popular-times curve that improves every week
-- **M3** — member login: your plan, days remaining, renewal history
+- **M1 — live busyness + popular times** (public, no login) ✅
+- **M2** — smarter popular-times curve that improves every week ✅
+- **M3** — member login: your plan, days remaining, renewal history ✅ ← current
 - **M4** — your activity: visits, weekly streaks, milestones
 - **M5** — offline polish, English/Arabic
 - **M6** — reminders & class booking
